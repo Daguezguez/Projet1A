@@ -1,0 +1,447 @@
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+#include <SDL/SDL.h> 
+#include <SDL/SDL_image.h> 
+#include <SDL/SDL_ttf.h>
+#include "f2.h"
+
+
+void init(char *title)
+   {
+  
+    /* Initialise SDL Video. Si la valeur de retour est inférieure à zéro, la SDL n'a pas pu
+     s'initialiser et on quite */
+
+    if (SDL_Init(SDL_INIT_VIDEO ) < 0)
+    {
+        printf("Could not initialize SDL: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+
+     /*  la mémoire vidéo
+     (SDL_HWPALETTE) et le double buffer pour éviter que ça scintille
+     (SDL_DOUBLEBUF) */
+
+    jeu.screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 0,
+                                                        SDL_HWPALETTE|SDL_DOUBLEBUF);
+
+     /* Si on y arrive pas, on quitte */
+
+    if (jeu.screen == NULL)
+        {
+            printf("Couldn't set screen mode to %d x %d: %s\n", SCREEN_WIDTH,  
+                     SCREEN_HEIGHT, SDL_GetError());
+            exit(1);
+        }
+
+
+    /* On entre le titre de la fenêtre */
+
+    SDL_WM_SetCaption(title, NULL);
+
+
+    /* On cache le curseur de la souris */
+
+    SDL_ShowCursor(SDL_DISABLE);
+
+    }
+
+   void loadGame(void)
+    {
+
+        /* Charge l'image du fond */
+        map.background = IMG_Load("Desktop/menu-finale.png");
+         
+        map.tileSet = IMG_Load("Desktop/pixel2.png");
+         jeu.onMenu = 1;
+    jeu.menuType = START;
+
+     }
+     
+
+    void cleanup()
+   {
+
+     /* Libère l'image du background */
+      if (map.background != NULL)
+      {
+            SDL_FreeSurface(map.background);
+      }
+
+
+     if (map.tileSet != NULL)
+      {
+           SDL_FreeSurface(map.tileSet);
+       }
+      
+
+      /* Quitte la SDL */
+      SDL_Quit();
+
+    }
+
+   void getInput()
+ {
+    SDL_Event event;
+
+    /* Keymapping : gère les appuis sur les touches et les enregistre
+    dans la structure input */
+
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+
+            case SDL_QUIT:
+                exit(0);
+            break;
+
+            case SDL_KEYDOWN:
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_ESCAPE:
+                        exit(0);
+                    break;
+
+                    case SDLK_DELETE:
+                        input.erase = 1;
+                    break;
+
+                    case SDLK_c:
+                        input.jump = 1;
+                    break;
+
+                      case SDLK_v:
+                        input.attack = 1;
+                    break;
+
+                    case SDLK_LEFT:
+                        input.left = 1;
+                    break;
+
+                    case SDLK_RIGHT:
+                        input.right = 1;
+                    break;
+
+                    case SDLK_DOWN:
+                        input.down = 1;
+                    break;
+
+                    case SDLK_UP:
+                        input.up = 1;
+                    break;
+
+                    case SDLK_RETURN:
+                        input.enter = 1;
+                    break;
+
+                    default:
+                    break;
+                }
+            break;
+
+            case SDL_KEYUP:
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_DELETE:
+                        input.erase = 0;
+                    break;
+
+                    case SDLK_c:
+                        input.jump = 0;
+                    break;
+
+                    case SDLK_LEFT:
+                        input.left = 0;
+                    break;
+
+                    case SDLK_RIGHT:
+                        input.right = 0;
+                    break;
+
+                    case SDLK_DOWN:
+                        input.down = 0;
+                    break;
+
+                    case SDLK_UP:
+                        input.up = 0;
+                    break;
+
+                    case SDLK_RETURN:
+                        input.enter = 0;
+                    break;
+
+                    default:
+                    break;
+                }
+            break;
+
+        }
+
+    }
+ }
+
+ 
+void drawImage(SDL_Surface *image, int x, int y)
+  {
+       SDL_Rect dest;
+
+       /* Règle le rectangle à blitter selon la taille de l'image source */
+
+       dest.x = x;
+       dest.y = y;
+       dest.w = image->w;
+       dest.h = image->h;
+
+       /* Blitte l'image entière sur l'écran aux coordonnées x et y */
+
+       SDL_BlitSurface(image, NULL, jeu.screen, &dest);
+   }
+
+  void drawTile(SDL_Surface *image, int destx, int desty, int srcx, int srcy)
+  {
+    /* Rectangle de destination à blitter */
+    SDL_Rect dest;
+
+    dest.x = destx;
+    dest.y = desty;
+    dest.w = TILE_SIZE;
+    dest.h = TILE_SIZE;
+
+    /* Rectangle source à blitter */
+    SDL_Rect src;
+
+    src.x = srcx;
+    src.y = srcy;
+    src.w = TILE_SIZE;
+    src.h = TILE_SIZE;
+
+    /* Blitte la tile choisie sur l'écran aux coordonnées x et y */
+
+    SDL_BlitSurface(image, &src, jeu.screen, &dest);
+
+  }
+
+  void draw(void)
+  {
+
+     /* Affiche le fond (background) aux coordonnées (0,0) */
+    
+     drawImage(map.background, 0, 0);
+
+     drawMap();
+
+    /* Affiche l'écran */
+    SDL_Flip(jeu.screen);
+
+    /* Delai */
+    SDL_Delay(1);
+
+  }
+
+void loadMap(char *name)
+ {
+    int x, y;
+    FILE *fp;
+
+    fp = fopen(name, "rb");
+
+    /* Si on ne peut pas ouvrir le fichier, on quitte */
+
+    if (fp == NULL)
+    {
+        printf("Failed to open map %s\n", name);
+        exit(1);
+    }
+
+
+    /* Lit les données du fichier dans la map */
+
+    map.maxX = map.maxY = 0;
+
+    for (y = 0; y < MAX_MAP_Y; y++)
+    {
+        for (x = 0; x < MAX_MAP_X; x++)
+        {
+            /* On lit le numéro de la tile et on le copie dans notre tableau */
+
+            fscanf(fp, "%d", &map.tile[y][x]);
+
+            /* Permet de déterminer la taille de la map (voir plus bas) */
+
+            if (map.tile[y][x] > 0)
+            {
+                if (x > map.maxX)
+                {
+                    map.maxX = x;
+                }
+
+                if (y > map.maxY)
+                {
+                    map.maxY = y;
+                }
+            }
+        }
+    }
+
+
+    /* maxX et maxY sont les coordonnées de fin de la map.
+    */
+
+    map.maxX = (map.maxX + 1) * TILE_SIZE;
+    map.maxY = (map.maxY + 1) * TILE_SIZE;
+
+
+    /* Remet à 0 les coordonnées de départ de la map */
+
+    map.startX = map.startY = 0;
+
+
+    /* Et on referme le fichier */
+
+    fclose(fp);
+
+  }
+
+
+   void drawMap(void)
+ {
+    int x, y, mapX, x1, x2, mapY, y1, y2, xsource, ysource, a;
+
+    /* Ces calculs compliqués serviront à calculer l'affichage de l'écran pendant le scrolling
+
+    mapX = map.startX / TILE_SIZE;
+    x1 = (map.startX % TILE_SIZE) * -1;
+    x2 = x1 + SCREEN_WIDTH + (x1 == 0 ? 0 : TILE_SIZE);
+
+    mapY = map.startY / TILE_SIZE;
+    y1 = (map.startY % TILE_SIZE) * -1;
+    y2 = y1 + SCREEN_HEIGHT + (y1 == 0 ? 0 : TILE_SIZE); */
+
+
+    /* Mais pour l'instant, comme on ne scrolle pas, on peut les simplifier :
+    On va en effet dessiner la map du début (0;0) jusqu'au bout de l'écran (640;480) */
+
+    mapX = 0;
+    x1 = 0;
+    x2 = SCREEN_WIDTH;
+
+    mapY = 0;
+    y1 = 0;
+    y2 = SCREEN_HEIGHT;
+
+
+
+    /* Dessine la carte en commençant par startX et startY */
+
+    /* On dessine ligne par ligne en commençant par y1 (0) jusqu'à y2 (480)
+    A chaque fois, on rajoute TILE_SIZE (donc 32), car on descend d'une ligne
+    de tile (qui fait 32 pixels de hauteur) */
+
+    for (y = y1; y < y2; y += TILE_SIZE)
+    {
+        /* A chaque début de ligne, on réinitialise mapX qui contient la colonne
+        (0 au début puisqu'on ne scrolle pas) */
+
+        mapX = map.startX / TILE_SIZE;
+
+        /* A chaque colonne de tile, on dessine la bonne tile en allant
+        de x = 0 à x = 640 */
+
+        for (x = x1; x < x2; x += TILE_SIZE)
+        {
+
+            /* Suivant le numéro de notre tile, on découpe le tileset */
+
+            a = map.tile[mapY][mapX];
+
+            /* Calcul pour obtenir son y (pour un tileset de 10 tiles
+            par ligne, d'où le 10 */
+
+            ysource = a / 10 * TILE_SIZE;
+
+            /* Et son x */
+
+            xsource = a % 10 * TILE_SIZE;
+
+            /* Fonction qui blitte la bonne tile au bon endroit */
+
+            drawTile(map.tileSet, x, y, xsource, ysource);
+
+            mapX++;
+        }
+
+        mapY++;
+    }
+  }
+
+
+
+  void delay(unsigned int frameLimit)
+  {
+
+    /* Gestion des 60 fps (images/stories/seconde) */
+
+    unsigned int ticks = SDL_GetTicks();
+
+    if (frameLimit < ticks)
+    {
+        return;
+    }
+
+    if (frameLimit > ticks + 16)
+    {
+        SDL_Delay(16);
+    }
+
+    else
+    {
+        SDL_Delay(frameLimit - ticks);
+    }
+  }
+
+ void updateStartMenu(void)
+{
+    //Si on appuie sur BAS
+    if(input.down == 1)
+    {
+        //Si choice = O (il est sur start), on le met à 1 (quit)
+        if(jeu.choice == 0)
+            jeu.choice++;
+
+        input.down = 0;
+    }
+
+    //Si on appuie sur HAUT
+    if(input.up == 1)
+    {
+        //Si choice = 1 (il est sur Quit), on le met à 0 (Start)
+        if(jeu.choice == 1)
+            jeu.choice--;
+
+        input.up = 0;
+    }
+
+    //Si on appuie sur Enter et qu'on est sur Start, on recharge le jeu et on quitte l'état menu
+    if(input.enter)
+    {
+         if(jeu.choice == 0)
+        {
+            
+            jeu.onMenu = 0;
+        }
+        //Sinon, on quitte le jeu
+        else if(jeu.choice == 1)
+        {
+            exit(0);
+        }
+         input.enter = 0;
+    }
+  
+
+}
+
+
+

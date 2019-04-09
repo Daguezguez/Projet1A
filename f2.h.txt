@@ -1,0 +1,115 @@
+ /* Taille de la fenêtre / résolution en plein écran */
+  #define SCREEN_WIDTH 1500
+  #define SCREEN_HEIGHT 1200
+
+  #define TRANS_R 255
+  #define TRANS_G 0
+  #define TRANS_B 255
+
+/* Taille maxi de la map : on voit large : 400 x 300 tiles */
+ #define MAX_MAP_X 1300
+ #define MAX_MAP_Y 1253
+
+
+ /* Taille d'une tile (32 x 32 pixels) */
+ #define TILE_SIZE 3000
+ 
+
+ /* Structures qui seront utilisées pour gérer le jeu */
+
+  /* Structure pour gérer l'input (clavier puis joystick) */
+
+   typedef struct Input
+  {
+
+    int left, right, up, down, jump, attack, enter, erase, pause;
+
+  } Input;
+
+
+  /* Structure pour gérer le niveau (à compléter plus tard) */
+
+  typedef struct Gestion
+  {
+
+    SDL_Surface *screen;
+    //Gestion des menus
+    int onMenu, menuType, choice;
+
+  } Gestion;
+
+   typedef struct Map
+  {
+
+      SDL_Surface *background,*tileSet;
+
+     /* Coordonnées de début, lorsqu'on doit dessiner la map */
+    int startX, startY;
+
+    /* Coordonnées max de fin de la map */
+    int maxX, maxY;
+
+    /* Tableau à double dimension représentant la map de tiles */
+    int tile[MAX_MAP_Y][MAX_MAP_X];
+
+  } Map;
+
+enum
+ {
+      START,
+      PAUSE
+  };
+
+
+
+
+  /* Structure pour gérer la map à afficher (à compléter plus tard) */
+
+  
+
+ /* Prototypes des fonctions utilisées */
+
+  extern void init(char *);
+  extern void cleanup(void);
+  extern void getInput(void);
+  extern void draw(void);
+  extern void delay(unsigned int);
+  extern void loadGame(void);
+  extern SDL_Surface *loadImage(char *name);
+  extern void loadMap(char *name);
+  extern void drawMap(void);
+  extern void drawImage(SDL_Surface *, int, int);
+  extern void drawTile(SDL_Surface *image, int destx, int desty, int srcx, int srcy);
+  extern void drawStartMenu(void);
+  extern void updateStartMenu(void);
+  extern void drawImage(SDL_Surface *image, int x, int y);
+
+  extern void drawString(char *text, int x, int y, TTF_Font *font);
+
+
+
+  /* Déclaration des structures globales utilisées par le jeu */
+
+  Input input;
+  Gestion jeu;
+
+  Map map;
+
+ TTF_Font *font;
+  
+
+ /* Prototypes des fonctions utilisées */
+     extern SDL_Surface *loadImage(char *name);
+
+
+    extern Gestion jeu;
+    
+
+
+   extern Input input;
+
+  extern TTF_Font *font;
+  extern Input input;
+
+  extern void drawString(char *text, int x, int y, TTF_Font *font);
+
