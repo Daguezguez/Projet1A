@@ -3,31 +3,9 @@
 #include "entite.h" 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h> 
-#include <SDL/SDL_mixer.h> 
+#include <SDL/SDL_mixer.h>
 
 
-
-void init(SDL_Surface *screen) 
-{	
-	SDL_Surface  *BOSS=NULL ; 
-	SDL_Rect posboss ; 
-	
-
-	SDL_Init(SDL_INIT_VIDEO ) ;
- 
-	BOSS = IMG_LOAD("BOSS.jpg") ; 
-
-	if (!BOSS) 
-		printf("unable to load BOSS \n " ) ; 
-	return 1 ; 
-
-	posboss.x =  800 ;
-	posboss.y = 600 ;
-
-	SDL_BlitSurface(BOSS,NULL,screen, &posboss) ;
-	SDL_Flip(screen) ; 
-	
-}
 void deplacement(entite1 E1 , entite2 E2 ) 
 {
     int val,val1 ; int D1=0 , G1=0,D2=0,G2=0 ; 
@@ -93,5 +71,5 @@ void animationG(int a , entite2 E2 , SDL_Surface *screen )
 		SDL_BlitSurface(E2.ID,NULL,screen,&E2.pos) ;
 		SDL_flip(screen) ; 
 		
-}
+		}
 }

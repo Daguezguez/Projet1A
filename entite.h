@@ -13,7 +13,6 @@ typedef struct
 }entite2 ; 
 
 void deplacement(entite1 E1 , entite2 E2 ) ;
-
 void animationD(entite E1 , int x , SDL_Surface *screen ) ;
 void animationG(entite E2 , int a , SDL_Surface *screen ) ;  
 
