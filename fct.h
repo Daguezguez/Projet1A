@@ -1,7 +1,7 @@
 
-#ifndef PERSONNAGE_H_INCLUDED
-#define PERSONNAGE_H_INCLUDED
-#include <string>
+#ifndef fct_H_INCLUDED
+#define fct_H_INCLUDED
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <SDL/SDL.h>
@@ -15,4 +15,4 @@ typedef struct AABB
 }
  AABB;
 
-#endif // PERSONNAGE_H_INCLUDED
+#endif // fct_H_INCLUDED

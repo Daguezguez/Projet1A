@@ -6,7 +6,8 @@
 
 int main(void)
 {
-	initilisation_perso(SDL_Surface*ecran, SDL_Surface *bechir);
+	init_perso();
+affichage_perso();
 	anime();
 	return 0;
 }             
