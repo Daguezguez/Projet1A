@@ -12,9 +12,12 @@ typedef struct
 	SDL_Surface ID,IG ; 
 }entite2 ; 
 
-void deplacement(entite1 E1 , entite2 E2 ) ;
-void animationD(entite E1 , int x , SDL_Surface *screen ) ;
-void animationG(entite E2 , int a , SDL_Surface *screen ) ;  
+
+void animation1D(int x ,  entite1 E1 , SDL_Surface *screen ) ;
+void animation1G(int a ,entite1 E1, SDL_Surface *screen ) ;  
+void animation2D(int k ,  entite2 E2 , SDL_Surface *screen ) ;
+void animation2G(int b ,entite2 E2, SDL_Surface *screen ) ; 
+void deplacement(entite1 E1, entite2 E2,SDL_Surface *screen )  ;
 
 
 #endif /*entite_H_ */ 
