@@ -76,13 +76,13 @@ void deplacement(entite1 E1 , entite2 E2, SDL_Surface *screen )
 			if (val) {
 				E1.pos.x+=10 ;  /*dep a droite si val = 1 */ 
 				D1++ ; 
-				animation1D(D1,E1,&screen) ; 
+				animation1D(D1,E1,screen) ; 
 				}
 			
 			else {
 				E1.pos.x-=10 ;  /* dep a gauche si val = 2 */ 
 				G1++ ; 
-				animation1G(G1,E1,&screen) ; 
+				animation1G(G1,E1,screen) ; 
 			} 					
 		
 			
@@ -90,12 +90,12 @@ void deplacement(entite1 E1 , entite2 E2, SDL_Surface *screen )
 			if(val1){
 				E2.pos.x+=10 ; 
 				D2++ ; 
-				animation2D(D2,E2,&screen) ;
+				animation2D(D2,E2,screen) ;
 				}
 			else {
 				E2.pos.x-=10 ;
 				G2++ ; 
-				animation2G(G2,E2,&screen) ; 
+				animation2G(G2,E2,screen) ; 
 				}
 		}
 							
