@@ -2,168 +2,75 @@
 #include <stdio.h>
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
+#include "handle.h"
 #include "fct.h"
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
-#define SPRITE_SIZE    32
-SDL_Surface *ecran, *imageDeFond, *bechir;
-SDL_Rect positionFond,positionbechir;
-
-void init_perso(void)
+int affichage_perso(SDL_Surface *screen,Perso *Maro, int ch)
 {
-	SDL_Init(SDL_INIT_VIDEO);
-	ecran = SDL_SetVideoMode(800, 600, 32, SDL_HWSURFACE);
-	imageDeFond = SDL_LoadBMP("background.bmp");
-	bechir = SDL_LoadBMP("bich1.jpg");
-	
-
+	int i=0;
+	i=HandleEvent1();
+	if (i==1){
+		if (ch!=1)
+			Maro->position.x+=10;
+        SDL_BlitSurface(Maro->image, NULL, screen, &(Maro->position));
+	Maro->PS=1;
+	}
+	else if (i==2){
+		if (ch!=2)
+			Maro->position.x-=10;
+        	SDL_BlitSurface(Maro->imageG, NULL, screen, &(Maro->position));
+		Maro->PS=2;
+	}
+	else if (i==5){
+		if (ch!=5)
+			Maro->position.y-=10;
+		if (Maro->PS==1)
+			SDL_BlitSurface(Maro->image, NULL, screen, &(Maro->position));
+		else if (Maro->PS==2)
+			SDL_BlitSurface(Maro->imageG, NULL, screen, &(Maro->position));
+	}
+	else if (i==6){
+		if (ch!=6)
+			Maro->position.y+=10;
+		if (Maro->PS==1)
+			SDL_BlitSurface(Maro->image, NULL, screen, &(Maro->position));
+		else if (Maro->PS==2)
+			SDL_BlitSurface(Maro->imageG, NULL, screen, &(Maro->position));
+	}
+	else if (Maro->PS==1)
+		SDL_BlitSurface(Maro->image, NULL, screen, &(Maro->position));
+	else if (Maro->PS==2)
+		SDL_BlitSurface(Maro->imageG, NULL, screen, &(Maro->position));
+return 0;
 }
-void affichage_perso(SDL_Rect positionBechir,SDL_Rect positionFond)
+int affichage_perso2(SDL_Surface *screen,Perso *Maro2)
 {
-SDL_Surface *ecran, *imageDeFond, *bechir;
-
-
-	positionFond.x = 0;
-	positionFond.y = 0;
-
-	SDL_BlitSurface(imageDeFond, NULL, ecran, &positionFond);
- SDL_BlitSurface(ecran, 0, ecran, &positionFond);
-        SDL_BlitSurface(bechir, 0, ecran, &positionBechir);
-
+	int i=0;
+	i=HandleEvent1();
+	if (i==3){
+	Maro2->position.x+=10;
+        SDL_BlitSurface(Maro2->image, NULL, screen, &(Maro2->position));
+	Maro2->PS=1;
+	}
+	else if (i==4){
+		Maro2->position.x-=10;
+        	SDL_BlitSurface(Maro2->imageG, NULL, screen, &(Maro2->position));
+		Maro2->PS=2;
+	}
+	else if (Maro2->PS==1)
+		SDL_BlitSurface(Maro2->image, NULL, screen, &(Maro2->position));
+	else if (Maro2->PS==2)
+		SDL_BlitSurface(Maro2->imageG, NULL, screen, &(Maro2->position));
+	else if (i==7){
+		Maro2->position.y-=10;
+		SDL_BlitSurface(Maro2->image, NULL, screen, &(Maro2->position));
+		}
+	else if (i==8){
+		Maro2->position.y+=10;
+		SDL_BlitSurface(Maro2->image, NULL, screen, &(Maro2->position));
+		}
+return 0;
 }
-int gameover;
 
-/* source and destination rectangles */
-SDL_Rect positionFond, positionsprite;
-
-void HandleEvent(SDL_Event event)
-{
-  switch (event.type) {
-    /* close button clicked */
-    case SDL_QUIT:
-      gameover = 1;
-      break;
-
-    /* handle the keyboard */
-    case SDL_KEYDOWN:
-      switch (event.key.keysym.sym) {
-        case SDLK_ESCAPE:
-        case SDLK_q:
-          gameover = 1;
-          break;
-        case SDLK_LEFT:
-          if ( positionFond.x == 192 )
-            positionFond.x = 224;
-          else
-            positionFond.x = 192;
-          positionsprite.x -= 5;
-          break;
-        case SDLK_RIGHT:
-          if ( positionFond.x == 64 )
-            positionFond.x = 96;
-          else
-            positionFond.x = 64;
-          positionsprite.x += 5;
-          break;
-        case SDLK_UP:
-          if ( positionFond.x == 0 )
-            positionFond.x = 32;
-          else
-            positionFond.x = 0;
-          positionsprite.y -= 5;
-          break;
-        case SDLK_DOWN:
-          if ( positionFond.x == 128 )
-            positionFond.x = 160;
-          else
-            positionFond.x = 128;
-          positionsprite.y += 5;
-          break;
-      }
-      break;
-  }
-}
-void anime (void){
- SDL_Surface *screen, *temp, *sprite, *grass;
-  SDL_Rect positionFond, positionsprite;
- int colorkey;
-
-  /* set keyboard repeat */
-  SDL_EnableKeyRepeat(70, 70);
-/* load sprite */
-  temp   = SDL_LoadBMP("sprite.bmp");
-  sprite = SDL_DisplayFormat(temp);
-  SDL_FreeSurface(temp);
-
-  /* setup sprite colorkey */
-  colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
-  SDL_SetColorKey(sprite, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
-
-  /* load grass */
-  temp  = SDL_LoadBMP("perso.bmp");
-  grass = SDL_DisplayFormat(temp);
-  SDL_FreeSurface(temp);
-
-  /* set sprite position */
-  positionsprite.x = 150;
-  positionsprite.y = 150;
-
-  /* set animation frame */
-  positionFond.x = 128;
-  positionFond.y = 0;
-  positionFond.w = SPRITE_SIZE;
-  positionFond.h = SPRITE_SIZE;
-
-  gameover = 0;
-
-  /* message pump */
-  while (!gameover)
-  {
-    SDL_Event event;
-
-    /* look for an event */
-    if (SDL_PollEvent(&event)) {
-      HandleEvent(event);
-    }
-
-    /* collide with edges of screen */
-    if ( positionsprite.x < 0 ) {
-      positionsprite.x = 0;
-    }
-    else if ( positionsprite.x > SCREEN_WIDTH-SPRITE_SIZE ) {
-      positionsprite.x = SCREEN_WIDTH-SPRITE_SIZE;
-    }
-    if ( positionsprite.y < 0 ) {
-      positionsprite.y = 0;
-    }
-    else if ( positionsprite.y > SCREEN_HEIGHT-SPRITE_SIZE ) {
-      positionsprite.y = SCREEN_HEIGHT-SPRITE_SIZE;
-    }
-
-    /* draw the grass */
-    for (int x = 0; x < SCREEN_WIDTH / SPRITE_SIZE; x++) {
-      for (int y = 0; y < SCREEN_HEIGHT / SPRITE_SIZE; y++) {
-        positionFond.x = x * SPRITE_SIZE;
-        positionFond.y = y * SPRITE_SIZE;
-        SDL_BlitSurface(grass, NULL, screen, &positionFond);
-      }
-    }
-}
-	
-
-int bool_collision (int x,int y,AABB box)
-{
-int curs_x,curseur_y;
-if (curs_x >= box.x 
-    && curs_x < box.x + box.w
-    && curseur_y >= box.y 
-    && curseur_y < box.y + box.h)
-       return 1;
-   else
-       return 0;
-
-}
-}
 
 
 
